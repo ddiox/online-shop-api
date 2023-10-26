@@ -53,7 +53,7 @@ Lists Product, Many to Many Relationship
 ## **POST /api/orders**
 create order based on productId inputs
 - **Data Params**  
-  list of productId
+  lists of productId
 ```
 [1,2,3, etc...]
 ```
@@ -89,7 +89,7 @@ create payment based on orderId input
   orderId
 ```
 {
-  "orderId": 1
+  "orderId": Long
 }
 
 ```
@@ -128,7 +128,7 @@ create shipping based on paymentId input
   paymentId
 ```
 {
-    "paymentId": 1,
+    "paymentId": Long,
     "address": String
 }
 
