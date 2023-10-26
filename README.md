@@ -28,7 +28,7 @@ returns all products
 ]
 ```
 
-## **GET /api/products:id**
+## **GET /api/products/:id**
 returns single products by id.
 - **Success Response:**
 ```
