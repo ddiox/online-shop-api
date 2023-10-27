@@ -1,14 +1,11 @@
 package com.domain.onlineshoppingapi.services;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.domain.onlineshoppingapi.models.entity.Order;
 import com.domain.onlineshoppingapi.models.entity.Payment;
 import com.domain.onlineshoppingapi.models.repos.PaymentRepository;
-
 import jakarta.transaction.Transactional;
 
 @Service
@@ -17,6 +14,12 @@ public class PaymentService {
     
     @Autowired
     private PaymentRepository paymentRepository;
+
+    // Fungsi Menghitung Total Amount yang dibayar
+    private double calculateTotalAmount(Order order) {
+        // Menjumlahkan harga-harga produk yang ada di order
+        return order.getProducts().stream().mapToDouble(product -> product.getPrice()).sum();
+    }
 
     //Fungsi Melakukan Pembayaran
     public Payment processPayment(Order order){
@@ -30,12 +33,6 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
 
-    // Fungsi Menghitung Total Amount yang dibayar
-    private double calculateTotalAmount(Order order) {
-        // Menjumlahkan harga-harga produk yang ada di order
-        return order.getProducts().stream().mapToDouble(product -> product.getPrice()).sum();
-    }
-
     public Iterable<Payment> findAll() {
         return paymentRepository.findAll();
     }
@@ -46,5 +43,9 @@ public class PaymentService {
             return payment.get();
         }
         return null;
+    }
+
+    public void removeOne(Long id) {
+        paymentRepository.deleteById(id);
     }
 }

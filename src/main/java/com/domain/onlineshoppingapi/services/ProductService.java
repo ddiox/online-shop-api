@@ -3,10 +3,8 @@ package com.domain.onlineshoppingapi.services;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.domain.onlineshoppingapi.models.entity.Product;
 import com.domain.onlineshoppingapi.models.repos.ProductRepository;
-
 import jakarta.transaction.Transactional;
 
 @Service
@@ -26,6 +24,10 @@ public class ProductService {
             return product.get();
         }
         return null;
+    }
+
+    public Product findByName(String name) {
+        return productRepository.findByName(name);
     }
 
     public Iterable<Product> findAll() {

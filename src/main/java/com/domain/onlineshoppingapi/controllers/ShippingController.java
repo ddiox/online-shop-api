@@ -1,17 +1,23 @@
 package com.domain.onlineshoppingapi.controllers;
 
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.domain.onlineshoppingapi.dto.ResponseData;
+import com.domain.onlineshoppingapi.dto.ShippingRequestData;
+import com.domain.onlineshoppingapi.exception.PaymentNotFoundException;
 import com.domain.onlineshoppingapi.models.entity.Payment;
 import com.domain.onlineshoppingapi.models.entity.Shipping;
 import com.domain.onlineshoppingapi.services.PaymentService;
 import com.domain.onlineshoppingapi.services.ShippingService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/shippings")
@@ -23,30 +29,40 @@ public class ShippingController {
     @Autowired
     private PaymentService paymentService;
 
-    // @PostMapping
-    // public Shipping processShipping(@RequestBody Map<String, Long> request){
-    //     Long paymentId = request.get("paymentId");
-    //     if (paymentId != null) {
-    //         Payment payment = paymentService.findOne(paymentId);
-    //         if (payment != null) {
-    //             return shippingService.processShipping(payment);
-    //         }
-    //     }
-    //     return null;
-    // }
+    private ResponseEntity<ResponseData<Shipping>> handleShippingOperation(Payment payment, String address) {
+        Shipping processedShipping = shippingService.processShipping(payment, address);
+        ResponseData<Shipping> responseData = new ResponseData<>();
+        responseData.setStatus(true);
+        responseData.setPayload(processedShipping);
+        return ResponseEntity.ok(responseData);
+    }
 
     @PostMapping
-    public Shipping processShipping(@RequestBody Map<String, Object> request) {
-        Integer paymentIdInteger = (Integer) request.get("paymentId");
-        String address = (String) request.get("address");
-    
-        if (paymentIdInteger != null && address != null) {
-            Long paymentId = paymentIdInteger.longValue(); 
+    public ResponseEntity<ResponseData<Shipping>> processShipping(@Valid @RequestBody ShippingRequestData shippingRequestData) {
+        Long paymentId = shippingRequestData.getPaymentId();
+        String address = shippingRequestData.getAddress();
+
+        if (paymentId != null) {
             Payment payment = paymentService.findOne(paymentId);
             if (payment != null) {
-                return shippingService.processShipping(payment, address);
+                return handleShippingOperation(payment, address);
             }
         }
-        return null;
+        throw new PaymentNotFoundException("Payment not found");
+    }
+
+    @GetMapping
+    public Iterable<Shipping> findAll() {
+        return shippingService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Shipping findOne(@PathVariable("id") Long id) {
+        return shippingService.findOne(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeOne(@PathVariable("id") Long id) {
+        shippingService.removeOne(id);
     }
 }

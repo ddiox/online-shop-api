@@ -2,14 +2,11 @@ package com.domain.onlineshoppingapi.services;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.domain.onlineshoppingapi.models.entity.Order;
 import com.domain.onlineshoppingapi.models.entity.Product;
 import com.domain.onlineshoppingapi.models.repos.OrderRepository;
-
 import jakarta.transaction.Transactional;
 
 @Service
@@ -22,7 +19,6 @@ public class OrderService {
     public Order createOrder(List<Product> products) {
         Order order = new Order();
         order.setProducts(products);
-
         return orderRepository.save(order);
     }
 

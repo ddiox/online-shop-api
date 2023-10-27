@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Entity
@@ -17,6 +18,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Positive(message = "Amount must be greater than zero")
     private double amount;
 
     @OneToOne
