@@ -10,7 +10,7 @@ import com.domain.onlineshoppingapi.dto.ResponseData;
 import com.domain.onlineshoppingapi.exception.OrderNotFoundException;
 import com.domain.onlineshoppingapi.exception.PaymentNotFoundException;
 import com.domain.onlineshoppingapi.exception.ProductNotFoundException;
-import com.domain.onlineshoppingapi.models.entity.Payment;
+import com.domain.onlineshoppingapi.exception.ShippingNotFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -50,6 +50,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ResponseData<Object>> handlePaymentNotFoundException(PaymentNotFoundException ex) {
+        ResponseData<Object> responseData = new ResponseData<>();
+        responseData.setStatus(false);
+        responseData.getMessage().add(ex.getMessage());
+        responseData.setPayload(null);
+        return ResponseEntity.badRequest().body(responseData);
+    }
+
+    @ExceptionHandler(ShippingNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ResponseData<Object>> handleShippingNotFoundException(ShippingNotFoundException ex) {
         ResponseData<Object> responseData = new ResponseData<>();
         responseData.setStatus(false);
         responseData.getMessage().add(ex.getMessage());

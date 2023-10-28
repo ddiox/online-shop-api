@@ -44,6 +44,9 @@ public class PaymentService {
         }
         return null;
     }
+    // public Payment findOne(Long id) {
+    //     return paymentRepository.findById(id).orElse(null);
+    // }
 
     public void removeOne(Long id) {
         paymentRepository.deleteById(id);

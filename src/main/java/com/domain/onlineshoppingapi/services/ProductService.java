@@ -25,6 +25,9 @@ public class ProductService {
         }
         return null;
     }
+    // public Product findOne(Long id) {
+    //     return productRepository.findById(id).orElse(null);
+    // }
 
     public Product findByName(String name) {
         return productRepository.findByName(name);

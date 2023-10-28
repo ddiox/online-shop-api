@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.domain.onlineshoppingapi.dto.ProductRequestData;
 import com.domain.onlineshoppingapi.dto.ResponseData;
 import com.domain.onlineshoppingapi.dto.SearchData;
+import com.domain.onlineshoppingapi.exception.ProductNotFoundException;
 import com.domain.onlineshoppingapi.models.entity.Product;
 import com.domain.onlineshoppingapi.services.ProductService;
 import jakarta.validation.Valid;
@@ -24,40 +25,84 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    private ResponseEntity<ResponseData<Product>> handleProductOperation(Product product) {
+    private Product convertDTOToEntity(ProductRequestData productRequestData) {
+        Product product = new Product();
+    
+        if (productRequestData.getId() != null) {
+            // Untuk proses Update mengambil Id yang dikirim dari RequestBody
+            product.setId(productRequestData.getId());
+        }
+    
+        product.setName(productRequestData.getName());
+        product.setDescription(productRequestData.getDescription());
+        product.setPrice(productRequestData.getPrice());
+    
+        return product;
+    }
+
+    private ResponseEntity<ResponseData<Product>> handleProductOperation(ProductRequestData productRequestData) {
         ResponseData<Product> responseData = new ResponseData<>();
+        Product product = convertDTOToEntity(productRequestData);
         responseData.setStatus(true);
         responseData.setPayload(productService.save(product));
         return ResponseEntity.ok(responseData);
     }
 
     @PostMapping
-    public ResponseEntity<ResponseData<Product>> create(@Valid @RequestBody Product product) {
-        return handleProductOperation(product);
+    public ResponseEntity<ResponseData<Product>> create(@Valid @RequestBody ProductRequestData productRequestData) {
+        return handleProductOperation(productRequestData);
     }
 
     @PutMapping
-    public ResponseEntity<ResponseData<Product>> update(@Valid @RequestBody Product product) {
-        return handleProductOperation(product);
+    public ResponseEntity<ResponseData<Product>> update(@Valid @RequestBody ProductRequestData productRequestData) {
+        return handleProductOperation(productRequestData);
     }
 
     @GetMapping
-    public Iterable<Product> findAll() {
-        return productService.findAll();
+    public ResponseEntity<ResponseData<Iterable<Product>>> findAll() {
+        ResponseData<Iterable<Product>> responseData = new ResponseData<>();
+        responseData.setStatus(true);
+        responseData.setPayload(productService.findAll());
+        return ResponseEntity.ok(responseData);
     }
 
     @GetMapping("/{id}")
-    public Product findOne(@PathVariable("id") Long id) {
-        return productService.findOne(id);
+    public ResponseEntity<ResponseData<Product>> findOne(@PathVariable("id") Long id) {
+        ResponseData<Product> responseData = new ResponseData<>();
+        Product product = productService.findOne(id);
+
+        if (product != null) {
+            responseData.setStatus(true);
+            responseData.setPayload(product);
+            return ResponseEntity.ok(responseData);
+        } 
+        throw new ProductNotFoundException("Product not found");
     }
 
     @PostMapping("/search/name")
-    public Product findByName(@RequestBody SearchData searchData) {
-        return productService.findByName(searchData.getSearchKey());
+    public ResponseEntity<ResponseData<Product>> findByName(@RequestBody SearchData searchData) {
+        ResponseData<Product> responseData = new ResponseData<>();
+        Product product = productService.findByName(searchData.getSearchKey());
+
+        if (product != null) {
+            responseData.setStatus(true);
+            responseData.setPayload(product);
+            return ResponseEntity.ok(responseData);
+        } 
+        throw new ProductNotFoundException("Product not found");
     }
 
     @DeleteMapping("/{id}")
-    public void removeOne(@PathVariable("id") Long id) {
-        productService.removeOne(id);
+    public ResponseEntity<ResponseData<Product>> removeOne(@PathVariable("id") Long id) {
+        ResponseData<Product> responseData = new ResponseData<>();
+        Product product = productService.findOne(id);
+    
+        if (product != null) {
+            productService.removeOne(id);
+            responseData.setStatus(true);
+            responseData.setPayload(product);
+            return ResponseEntity.ok(responseData);
+        } 
+        throw new ProductNotFoundException("Product not found");
     }
 }

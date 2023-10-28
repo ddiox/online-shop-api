@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.domain.onlineshoppingapi.dto.PaymentRequestData;
 import com.domain.onlineshoppingapi.dto.ResponseData;
 import com.domain.onlineshoppingapi.exception.OrderNotFoundException;
+import com.domain.onlineshoppingapi.exception.PaymentNotFoundException;
 import com.domain.onlineshoppingapi.models.entity.Order;
 import com.domain.onlineshoppingapi.models.entity.Payment;
 import com.domain.onlineshoppingapi.services.OrderService;
 import com.domain.onlineshoppingapi.services.PaymentService;
-
 import jakarta.validation.Valid;
 
 @RestController
@@ -39,28 +39,50 @@ public class PaymentController {
 
     @PostMapping
     public ResponseEntity<ResponseData<Payment>> processPayment(@Valid @RequestBody PaymentRequestData paymentRequestData) {
-    Long orderId = paymentRequestData.getOrderId();
-    if (orderId != null) {
+        Long orderId = paymentRequestData.getOrderId();
+        if (orderId != null) {
         Order order = orderService.findOne(orderId);
         if (order != null) {
             return handlePaymentOperation(order);
         }
-    }
-    throw new OrderNotFoundException("Order not found");
+        }
+        throw new OrderNotFoundException("Order not found");
     }
 
     @GetMapping
-    public Iterable<Payment> findAll() {
-        return paymentService.findAll();
+    public ResponseEntity<ResponseData<Iterable<Payment>>> findAll() {
+        ResponseData<Iterable<Payment>> responseData = new ResponseData<>();
+        responseData.setStatus(true);
+        responseData.setPayload(paymentService.findAll());
+        return ResponseEntity.ok(responseData);
     }
 
     @GetMapping("/{id}")
-    public Payment findOne(@PathVariable("id") Long id) {
-        return paymentService.findOne(id);
+    public ResponseEntity<ResponseData<Payment>> findOne(@PathVariable("id") Long id) {
+        ResponseData<Payment> responseData = new ResponseData<>();
+        Payment payment = paymentService.findOne(id);
+
+        if (payment != null) {
+            responseData.setStatus(true);
+            responseData.setPayload(payment);
+            return ResponseEntity.ok(responseData);
+        }
+        throw new PaymentNotFoundException("Payment not found");
     }
 
     @DeleteMapping("/{id}")
-    public void removeOne(@PathVariable("id") Long id) {
-        paymentService.removeOne(id);
+    public ResponseEntity<ResponseData<Payment>> removeOne(@PathVariable("id") Long id) {
+        ResponseData<Payment> responseData = new ResponseData<>();
+        Payment payment = paymentService.findOne(id);
+
+        if (payment != null) {
+            paymentService.removeOne(id);
+            responseData.setStatus(true);
+            responseData.setPayload(payment);
+            return ResponseEntity.ok(responseData);
+        }
+        throw new PaymentNotFoundException("Payment not found");
     }
 }
+
+ 

@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class PaymentRequestData {
 
-    @NotNull(message = "Order id is required")
-    @Positive(message = "Order id must be greater than zero")
+    @NotNull(message = "Order ID is required")
+    @Positive(message = "Order ID must be greater than zero")
     private Long orderId;
 }

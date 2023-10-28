@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.domain.onlineshoppingapi.dto.ResponseData;
 import com.domain.onlineshoppingapi.dto.ShippingRequestData;
 import com.domain.onlineshoppingapi.exception.PaymentNotFoundException;
+import com.domain.onlineshoppingapi.exception.ShippingNotFoundException;
 import com.domain.onlineshoppingapi.models.entity.Payment;
 import com.domain.onlineshoppingapi.models.entity.Shipping;
 import com.domain.onlineshoppingapi.services.PaymentService;
@@ -52,17 +53,38 @@ public class ShippingController {
     }
 
     @GetMapping
-    public Iterable<Shipping> findAll() {
-        return shippingService.findAll();
+    public ResponseEntity<ResponseData<Iterable<Shipping>>> findAll() {
+        ResponseData<Iterable<Shipping>> responseData = new ResponseData<>();
+        responseData.setStatus(true);
+        responseData.setPayload(shippingService.findAll());
+        return ResponseEntity.ok(responseData);
     }
 
     @GetMapping("/{id}")
-    public Shipping findOne(@PathVariable("id") Long id) {
-        return shippingService.findOne(id);
+    public ResponseEntity<ResponseData<Shipping>> findOne(@PathVariable("id") Long id) {
+        ResponseData<Shipping> responseData = new ResponseData<>();
+        Shipping shipping = shippingService.findOne(id);
+
+        if (shipping != null) {
+            responseData.setStatus(true);
+            responseData.setPayload(shipping);
+            return ResponseEntity.ok(responseData);
+        }
+        throw new ShippingNotFoundException("Shipping not found");
     }
 
     @DeleteMapping("/{id}")
-    public void removeOne(@PathVariable("id") Long id) {
-        shippingService.removeOne(id);
+    public ResponseEntity<ResponseData<Shipping>> removeOne(@PathVariable("id") Long id) {
+        ResponseData<Shipping> responseData = new ResponseData<>();
+        Shipping shipping = shippingService.findOne(id);
+
+        if (shipping != null) {
+            shippingService.removeOne(id);
+            responseData.setStatus(true);
+            responseData.setPayload(shipping);
+            return ResponseEntity.ok(responseData);
+        }
+        throw new ShippingNotFoundException("Shipping not found");
     }
 }
+

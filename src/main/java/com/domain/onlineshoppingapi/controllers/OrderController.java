@@ -11,14 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.domain.onlineshoppingapi.dto.OrderRequestData;
 import com.domain.onlineshoppingapi.dto.ResponseData;
+import com.domain.onlineshoppingapi.exception.OrderNotFoundException;
 import com.domain.onlineshoppingapi.exception.ProductNotFoundException;
 import com.domain.onlineshoppingapi.models.entity.Order;
 import com.domain.onlineshoppingapi.models.entity.Product;
 import com.domain.onlineshoppingapi.services.OrderService;
 import com.domain.onlineshoppingapi.services.ProductService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -29,9 +30,10 @@ public class OrderController {
 
     @Autowired
     private ProductService productService;
-  
-    private ResponseEntity<ResponseData<Order>> handleOrderOperation(List<Long> productIds) {
+
+    private ResponseEntity<ResponseData<Order>> handleOrderOperation(OrderRequestData orderRequestData) {
         // Asumsikan productIds merepresentasikan ID dari produk yang dipilih/diorder
+        List<Long> productIds = orderRequestData.getProductIds();
         List<Product> products = new ArrayList<>();
         for (Long productId : productIds) {
             Product product = productService.findOne(productId);
@@ -50,22 +52,48 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseData<Order>> createOrder(@Valid @RequestBody @NotEmpty(message = "Product IDs are required") List<Long> productIds) {
-        return handleOrderOperation(productIds);
+    public ResponseEntity<ResponseData<Order>> createOrder(@Valid @RequestBody OrderRequestData orderRequestData) {
+        return handleOrderOperation(orderRequestData);
     }
 
     @GetMapping
-    public Iterable<Order> findAll() {
-        return orderService.findAll();
+    public ResponseEntity<ResponseData<Iterable<Order>>> findAllOrders() {
+        ResponseData<Iterable<Order>> responseData = new ResponseData<>();
+        responseData.setStatus(true);
+        responseData.setPayload(orderService.findAll());
+        return ResponseEntity.ok(responseData);
     }
 
+    
     @GetMapping("/{id}")
-    public Order findOne(@PathVariable("id") Long id) {
-        return orderService.findOne(id);
+    public ResponseEntity<ResponseData<Order>> findOneOrder(@PathVariable("id") Long id) {
+        ResponseData<Order> responseData = new ResponseData<>();
+        Order order = orderService.findOne(id);
+
+        if (order != null) {
+            responseData.setStatus(true);
+            responseData.setPayload(order);
+            return ResponseEntity.ok(responseData);
+        } 
+        throw new OrderNotFoundException("Order not found");
     }
 
     @DeleteMapping("/{id}")
-    public void removeOne(@PathVariable("id") Long id) {
-        orderService.removeOne(id);
+    public ResponseEntity<ResponseData<Order>> removeOneOrder(@PathVariable("id") Long id) {
+        ResponseData<Order> responseData = new ResponseData<>();
+        Order order = orderService.findOne(id);
+    
+        if (order != null) {
+            orderService.removeOne(id);
+            responseData.setStatus(true);
+            responseData.setPayload(order);
+            return ResponseEntity.ok(responseData);
+        } 
+        throw new OrderNotFoundException("Order not found");
     }
 }
+
+
+
+
+

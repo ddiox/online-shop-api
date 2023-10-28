@@ -29,6 +29,9 @@ public class OrderService {
         }
         return null;
     }
+    // public Proudct findOne(Long id) {
+    //     return productRepository.findById(id).orElse(null);
+    // }
 
     public Iterable<Order> findAll() {
         return orderRepository.findAll();
