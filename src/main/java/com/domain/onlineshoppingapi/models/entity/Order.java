@@ -20,6 +20,10 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // private String code;
+
+    // private String status; //pending, success, expired
+
     @ManyToMany
     @JoinTable(name = "orders_products_table", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> products;
