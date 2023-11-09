@@ -1,4 +1,4 @@
-package com.domain.onlineshoppingapi.dto;
+package com.domain.onlineshoppingapi.dtos;
 
 import lombok.Data;
 

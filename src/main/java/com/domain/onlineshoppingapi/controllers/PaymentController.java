@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.domain.onlineshoppingapi.dto.PaymentRequestData;
-import com.domain.onlineshoppingapi.dto.ResponseData;
+
+import com.domain.onlineshoppingapi.dtos.PaymentRequestData;
+import com.domain.onlineshoppingapi.dtos.ResponseData;
 import com.domain.onlineshoppingapi.exception.OrderNotFoundException;
 import com.domain.onlineshoppingapi.exception.PaymentNotFoundException;
 import com.domain.onlineshoppingapi.models.entity.Order;

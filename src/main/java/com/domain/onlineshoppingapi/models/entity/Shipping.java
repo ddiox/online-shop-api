@@ -1,6 +1,10 @@
 package com.domain.onlineshoppingapi.models.entity;
 
+import java.time.LocalDate;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,6 +21,17 @@ public class Shipping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "Code is required")
+    @Column(unique = true)
+    private String code;
+
+    @NotBlank(message = "Status is required")
+    @Enumerated(EnumType.STRING)
+    private ShippingStatus status;
+
+    @NotBlank(message = "Date is required")
+    private LocalDate shippingDate;
 
     @NotBlank(message = "Address is required")
     private String address;

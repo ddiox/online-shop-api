@@ -1,20 +1,31 @@
 package com.domain.onlineshoppingapi.services;
 
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.domain.onlineshoppingapi.dtos.param.ProductParams;
+import com.domain.onlineshoppingapi.dtos.param.SearchKeyParams;
 import com.domain.onlineshoppingapi.models.entity.Product;
 import com.domain.onlineshoppingapi.models.repos.ProductRepository;
 import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class ProductService {
+public class ProductService implements IProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-    public Product save(Product product) {
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    public Product saveOrUpdate(ProductParams productParams) {
+        Product product = new Product();
+        product.setCode(productParams.getCode());
+        product.setName(productParams.getName());
+        product.setDescription(productParams.getDescription());
+        product.setPrice(productParams.getPrice());
+
         return productRepository.save(product);
     }
 
@@ -25,19 +36,36 @@ public class ProductService {
         }
         return null;
     }
-    // public Product findOne(Long id) {
-    //     return productRepository.findById(id).orElse(null);
-    // }
 
-    public Product findByName(String name) {
-        return productRepository.findByName(name);
+    public Product findByName(SearchKeyParams searchKeyParams) {
+        Optional<Product> product = productRepository.findByName(searchKeyParams.getSearchKey());
+        if(product.isPresent()) {
+            return product.get();
+        }
+        return null;
     }
-
+    
+    public Product findByCode(SearchKeyParams searchKeyParams) {
+        Optional<Product> product = productRepository.findByCode(searchKeyParams.getSearchKey());
+        if(product.isPresent()) {
+            return product.get();
+        }
+        return null;
+    }
+    
     public Iterable<Product> findAll() {
         return productRepository.findAll();
+    }
+ 
+    public Iterable<Product> findByNameContains(SearchKeyParams searchKeyParams, Pageable pageable) {
+        return productRepository.findByNameContains(searchKeyParams.getSearchKey(), pageable);
+    }
+
+    public Iterable<Product> findByCodeContains(SearchKeyParams searchKeyParams, Pageable pageable) {
+        return productRepository.findByCodeContains(searchKeyParams.getSearchKey(), pageable);
     }
 
     public void removeOne(Long id) {
         productRepository.deleteById(id);
-    } 
+    }
 }

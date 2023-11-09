@@ -1,4 +1,4 @@
-package com.domain.onlineshoppingapi.dto;
+package com.domain.onlineshoppingapi.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
