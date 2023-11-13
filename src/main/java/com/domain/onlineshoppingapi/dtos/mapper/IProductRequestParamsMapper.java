@@ -8,5 +8,6 @@ import com.domain.onlineshoppingapi.dtos.param.ProductParams;
 public interface IProductRequestParamsMapper {
 
     public ProductRequest productParamsToProductRequest(ProductParams productParams);
+    
     public ProductParams productRequestToProductParams(ProductRequest productRequest);
 } 

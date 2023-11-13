@@ -8,5 +8,6 @@ import com.domain.onlineshoppingapi.dtos.request.SearchKeyRequest;
 public interface ISearchKeyRequestParamsMapper {
 
     public SearchKeyRequest searchKeyParamsToSearchKeyRequest(SearchKeyParams searchKeyParams);
+    
     public SearchKeyParams searchKeyRequestToSearchKeyParams(SearchKeyRequest searchKeyRequest);
 } 

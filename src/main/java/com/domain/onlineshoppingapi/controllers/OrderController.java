@@ -1,96 +1,134 @@
 package com.domain.onlineshoppingapi.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.domain.onlineshoppingapi.dtos.OrderRequestData;
-import com.domain.onlineshoppingapi.dtos.ResponseData;
-import com.domain.onlineshoppingapi.exception.OrderNotFoundException;
-import com.domain.onlineshoppingapi.exception.ProductNotFoundException;
-import com.domain.onlineshoppingapi.models.entity.Order;
-import com.domain.onlineshoppingapi.models.entity.Product;
-import com.domain.onlineshoppingapi.services.OrderService;
-import com.domain.onlineshoppingapi.services.ProductService;
+import com.domain.onlineshoppingapi.dtos.mapper.IOrderRequestParamsMapper;
+import com.domain.onlineshoppingapi.dtos.mapper.ISearchKeyRequestParamsMapper;
+import com.domain.onlineshoppingapi.dtos.param.OrderParams;
+import com.domain.onlineshoppingapi.dtos.param.SearchKeyParams;
+import com.domain.onlineshoppingapi.dtos.request.OrderRequest;
+import com.domain.onlineshoppingapi.dtos.request.SearchKeyRequest;
+import com.domain.onlineshoppingapi.dtos.response.OrderResponse;
+import com.domain.onlineshoppingapi.dtos.response.ResponseData;
+import com.domain.onlineshoppingapi.services.IOrderService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final IOrderService orderService;
 
-    @Autowired
-    private ProductService productService;
+    private final IOrderRequestParamsMapper orderRequestMapper;
 
-    private ResponseEntity<ResponseData<Order>> handleOrderOperation(OrderRequestData orderRequestData) {
-        // Asumsikan productIds merepresentasikan ID dari produk yang dipilih/diorder
-        List<Long> productIds = orderRequestData.getProductIds();
-        List<Product> products = new ArrayList<>();
-        for (Long productId : productIds) {
-            Product product = productService.findOne(productId);
-            if (product != null) {
-                products.add(product);
-            }
-        }
-        if (products.isEmpty()) {
-            throw new ProductNotFoundException("No valid products found with the given IDs");
-        }
-        Order createdOrder = orderService.createOrder(products);
-        ResponseData<Order> responseData = new ResponseData<>();
-        responseData.setStatus(true);
-        responseData.setPayload(createdOrder);
-        return ResponseEntity.ok(responseData);
+    private final ISearchKeyRequestParamsMapper searchKeyRequestMapper;
+
+    public OrderController(IOrderService orderService, IOrderRequestParamsMapper orderRequestMapper, ISearchKeyRequestParamsMapper searchKeyRequestMapper) {
+        this.orderService = orderService;
+        this.orderRequestMapper = orderRequestMapper;
+        this.searchKeyRequestMapper = searchKeyRequestMapper;
     }
 
     @PostMapping
-    public ResponseEntity<ResponseData<Order>> createOrder(@Valid @RequestBody OrderRequestData orderRequestData) {
-        return handleOrderOperation(orderRequestData);
-    }
-
-    @GetMapping
-    public ResponseEntity<ResponseData<Iterable<Order>>> findAllOrders() {
-        ResponseData<Iterable<Order>> responseData = new ResponseData<>();
+    public ResponseEntity<ResponseData<OrderResponse>> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
+        ResponseData<OrderResponse> responseData = new ResponseData<>();
+        OrderParams orderParams = orderRequestMapper.orderRequestToOrderParams(orderRequest);
+        OrderResponse orderResponse = orderService.createOrder(orderParams);
         responseData.setStatus(true);
-        responseData.setPayload(orderService.findAll());
+        responseData.setPayload(orderResponse);
+
         return ResponseEntity.ok(responseData);
     }
 
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Order>> findOneOrder(@PathVariable("id") Long id) {
-        ResponseData<Order> responseData = new ResponseData<>();
-        Order order = orderService.findOne(id);
+    @GetMapping
+    public ResponseEntity<ResponseData<Iterable<OrderResponse>>> findAll() {
+        ResponseData<Iterable<OrderResponse>> responseData = new ResponseData<>();
+        responseData.setStatus(true);
+        responseData.setPayload(orderService.findAll());
 
-        if (order != null) {
-            responseData.setStatus(true);
-            responseData.setPayload(order);
-            return ResponseEntity.ok(responseData);
-        } 
-        throw new OrderNotFoundException("Order not found");
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseData<OrderResponse>> findOne(@PathVariable("id") Long id) {
+        ResponseData<OrderResponse> responseData = new ResponseData<>();
+        OrderResponse orderResponse = orderService.findOne(id);
+        responseData.setStatus(true);
+        responseData.setPayload(orderResponse);
+
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/search/code")
+    public ResponseEntity<ResponseData<OrderResponse>> findByCode(@RequestBody SearchKeyRequest searchKeyRequest) {
+        ResponseData<OrderResponse> responseData = new ResponseData<>();
+        SearchKeyParams searchKeyParams = searchKeyRequestMapper.searchKeyRequestToSearchKeyParams(searchKeyRequest);
+        OrderResponse orderResponse = orderService.findByCode(searchKeyParams);
+        responseData.setStatus(true);
+        responseData.setPayload(orderResponse);
+
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/search/code/{size}/{page}")
+    public ResponseEntity<ResponseData<Iterable<OrderResponse>>> findByCodeContains(
+        @Valid @RequestBody SearchKeyRequest searchKeyRequest,
+        @PathVariable("size") int size, @PathVariable("page") int page) {
+        ResponseData<Iterable<OrderResponse>> responseData = new ResponseData<>();
+        SearchKeyParams searchKeyParams = searchKeyRequestMapper.searchKeyRequestToSearchKeyParams(searchKeyRequest);
+        Pageable pageable = PageRequest.of(page, size);
+        responseData.setStatus(true);
+        responseData.setPayload(orderService.findByCodeContains(searchKeyParams, pageable));
+        
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping("/search/code/{size}/{page}/{sort}")
+    public ResponseEntity<ResponseData<Iterable<OrderResponse>>> findByCodeContains(
+        @Valid @RequestBody SearchKeyRequest searchKeyRequest,
+        @PathVariable("size") int size, @PathVariable("page") int page,
+        @PathVariable("sort") String sort) {
+        ResponseData<Iterable<OrderResponse>> responseData = new ResponseData<>();
+        SearchKeyParams searchKeyParams = searchKeyRequestMapper.searchKeyRequestToSearchKeyParams(searchKeyRequest);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("code"));
+        if (sort.equalsIgnoreCase("desc")) {
+            pageable = PageRequest.of(page, size, Sort.by("code").descending());
+        }
+        responseData.setStatus(true);
+        responseData.setPayload(orderService.findByCodeContains(searchKeyParams, pageable));
+    
+        return ResponseEntity.ok(responseData);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseData<OrderResponse>> update(@PathVariable("id") Long id, @Valid @RequestBody OrderRequest orderRequest) {
+        ResponseData<OrderResponse> responseData = new ResponseData<>();
+        OrderParams orderParams = orderRequestMapper.orderRequestToOrderParams(orderRequest);
+        OrderResponse updatedOrder = orderService.update(id, orderParams);
+        responseData.setStatus(true);
+        responseData.setPayload(updatedOrder);
+
+        return ResponseEntity.ok(responseData);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseData<Order>> removeOneOrder(@PathVariable("id") Long id) {
-        ResponseData<Order> responseData = new ResponseData<>();
-        Order order = orderService.findOne(id);
-    
-        if (order != null) {
-            orderService.removeOne(id);
-            responseData.setStatus(true);
-            responseData.setPayload(order);
-            return ResponseEntity.ok(responseData);
-        } 
-        throw new OrderNotFoundException("Order not found");
+    public ResponseEntity<ResponseData<OrderResponse>> removeOne(@PathVariable("id") Long id) {
+        ResponseData<OrderResponse> responseData = new ResponseData<>();
+        OrderResponse orderResponse = orderService.removeOne(id);
+        responseData.setStatus(true);
+        responseData.setPayload(orderResponse);
+
+        return ResponseEntity.ok(responseData);
     }
 }
 

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.domain.onlineshoppingapi.dtos.ResponseData;
+import com.domain.onlineshoppingapi.dtos.response.ResponseData;
 import com.domain.onlineshoppingapi.exception.OrderNotFoundException;
 import com.domain.onlineshoppingapi.exception.PaymentNotFoundException;
 import com.domain.onlineshoppingapi.exception.ProductNotFoundException;

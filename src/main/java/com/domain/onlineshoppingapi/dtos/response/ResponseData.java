@@ -1,4 +1,4 @@
-package com.domain.onlineshoppingapi.dtos;
+package com.domain.onlineshoppingapi.dtos.response;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import lombok.Data;
 public class ResponseData<T> {
     
     private boolean status;
+
     private List<String> message = new ArrayList<>();
+    
     private T payload;
 }

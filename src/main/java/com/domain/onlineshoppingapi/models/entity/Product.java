@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Entity
@@ -26,6 +25,5 @@ public class Product {
 
     private String description;
     
-    @Positive(message = "Price must be greater than zero")
     private Double price;
 }
