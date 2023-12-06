@@ -1,12 +1,14 @@
 package com.domain.onlineshoppingapi.models.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Entity
@@ -18,7 +20,12 @@ public class Shipping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Address is required")
+    @Column(unique = true)
+    private String code;
+
+    @Enumerated(EnumType.STRING)
+    private ShippingStatus status;
+
     private String address;
 
     @OneToOne

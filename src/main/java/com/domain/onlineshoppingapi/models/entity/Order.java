@@ -1,7 +1,10 @@
 package com.domain.onlineshoppingapi.models.entity;
 
 import java.util.List;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,9 +23,11 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // private String code;
+    @Column(unique = true)
+    private String code;
 
-    // private String status; //pending, success, expired
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     @ManyToMany
     @JoinTable(name = "orders_products_table", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
